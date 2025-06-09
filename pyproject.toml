@@ -1,0 +1,36 @@
+[project]
+name = "glimmr"
+version = "0.0.1"
+description = "Repository for cam feed / photo editing project."
+authors = [
+    { name = "Jordan Hilsman", email = "jordanhilsman@gmail.com" }
+]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+
+dependencies = [
+"imageio",
+"lazy_loader",
+"networkx",
+"numpy",
+"opencv-python",
+"packaging",
+"pillow",
+"scikit-image",
+"scipy",
+"tifffile"
+]
+
+[project.scripts]
+glimmr = "glitch:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
