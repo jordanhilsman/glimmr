@@ -1,10 +1,14 @@
 import sys
 import cv2
+from slider import ColorChannelButton
 from PyQt5.QtCore import Qt, QPoint, QPointF
 from PyQt5.QtGui import QPixmap, QImage
 
 from PyQt5.QtWidgets import (
     QApplication,
+    QFileDialog,
+    QToolBar,
+    QAction,
     QHBoxLayout,
     QPushButton,
     QCheckBox,
@@ -29,6 +33,7 @@ from PyQt5.QtWidgets import (
 )
 
 
+
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -43,6 +48,9 @@ class MainWindow(QMainWindow):
         self.red_btn = QPushButton("RED")
         self.green_btn = QPushButton("GREEN")
         self.blue_btn = QPushButton("BLUE")
+        self.red_slider = ColorChannelButton(channel=2)
+        self.green_slider = ColorChannelButton(channel=1)
+        self.blue_slider = ColorChannelButton(channel=0)
         self.reset_btn = QPushButton("RESET IMAGE")
         self.color_channel = None
         for btn in [self.red_btn, self.green_btn, self.blue_btn, self.reset_btn]:
@@ -51,6 +59,11 @@ class MainWindow(QMainWindow):
         self.green_btn.clicked.connect(lambda: self.activate_button(1))
         self.blue_btn.clicked.connect(lambda: self.activate_button(0))
         self.reset_btn.clicked.connect(self.reset_image)
+        toolbar = QToolBar("Glimmr Tools")
+        self.addToolBar(toolbar)
+        button_action = QAction("Get image", self)
+        button_action.triggered.connect(self.get_filepath)
+        toolbar.addAction(button_action)
         widget = QLabel("Hello")
         self.label = widget
         font = widget.font()
@@ -72,6 +85,9 @@ class MainWindow(QMainWindow):
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.label)
+        main_layout.addWidget(self.red_slider)
+        main_layout.addWidget(self.green_slider)
+        main_layout.addWidget(self.blue_slider)
         main_layout.addLayout(button_layout)
 
         container = QWidget()
@@ -100,11 +116,16 @@ class MainWindow(QMainWindow):
     def reset_image(self):
         self.r0 = False
         self.reset_btn.setChecked(True)
-        self.cvImg = cv2.imread('/home/jordan/photos/bmw.jpg')
+        self.cvImg = cv2.imread(self.filename)
         height, width, channel = self.cvImg.shape
         bytesPerLine = 3 * width
         qImg = QImage(self.cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888).rgbSwapped()
         self.label.setPixmap(QPixmap(qImg))
+
+    def get_filepath(self, s):
+        filename, _ = QFileDialog.getOpenFileName(self, 'Single File', directory="/home/jordan/")
+        self.filename = filename
+        self.cvImg = cv2.imread(self.filename)
 
     def mousePressEvent(self, e):
         self.start_pos.setX(e.pos().x())
