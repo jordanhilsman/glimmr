@@ -18,10 +18,9 @@ class ColorChannelButton(QSlider):
         self.sliderReleased.connect(self.slider_released)
         self.setStyleSheet(self.get_stylesheet_for_channel(channel))
     def value_changed(self, i):
-        print(i)
-
+        return i
     def slider_position(self, p):
-        print("position", p)
+        return p
 
     def slider_pressed(self):
         print("Pressed!")
