@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 from slider import ColorChannelButton
 from PyQt5.QtCore import Qt, QPoint, QPointF, QTimer
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QPixmap, QImage, QGuiApplication
 
 from PyQt5.QtWidgets import (
     QApplication,
@@ -39,6 +39,9 @@ from PyQt5.QtWidgets import (
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        screen = QGuiApplication.primaryScreen()
+        size = screen.availableGeometry()
+        self.setGeometry(size)
         self.setWindowTitle("Welcome to Glimmr!")
         self.start_pos, self.end_pos = QPoint(0,0), QPoint(0,0)
         self.add_channel_zero = 0
@@ -104,9 +107,19 @@ class MainWindow(QMainWindow):
         self.filename = filename
         self.cvImg = cv2.imread(self.filename)
         self.origImg = self.cvImg.copy()
-        width, height, _ = self.cvImg.shape
-        bytesPerLine = 3 * width
-        readQIMG = QImage(self.cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888).rgbSwapped()
+        screen_rect = QGuiApplication.primaryScreen().availableGeometry()
+        screen_width, screen_height = screen_rect.width(), screen_rect.height()
+        img_h, img_w = self.cvImg.shape[:2]
+        scale_w = screen_width / img_w
+        scale_h = screen_height / img_h
+        scale = min(scale_w, scale_h)
+        new_w = int(img_w * scale)
+        new_h = int(img_h * scale)
+        resized_img = cv2.resize(self.cvImg, (new_w, new_h), interpolation=cv2.INTER_AREA)
+        self.cvImg = resized_img
+        self.origImg = resized_img.copy()
+        bytesPerLine = 3 * new_w 
+        readQIMG = QImage(self.cvImg.data, new_w, new_h, bytesPerLine, QImage.Format_RGB888).rgbSwapped()
         self.label.setPixmap(QPixmap(readQIMG))
 
     def mousePressEvent(self, e):
