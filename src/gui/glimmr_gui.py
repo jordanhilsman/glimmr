@@ -63,19 +63,16 @@ class MainWindow(QMainWindow):
         self.addToolBar(toolbar)
         button_action = QAction("Get image", self)
         button_action.triggered.connect(self.get_filepath)
+        save_action = QAction("Save image", self)
+        save_action.triggered.connect(self.save_image_to_filepath)
         toolbar.addAction(button_action)
+        toolbar.addAction(save_action)
         widget = QLabel("Please load an image in :-)")
         self.label = widget
         font = widget.font()
         font.setPointSize(30)
         widget.setFont(font)
         widget.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-#        self.cvImg = cv2.imread('/home/jordan/photos/bmw.jpg')
-#        self.origImg = self.cvImg.copy()
-#        height, width, channel = self.cvImg.shape
-#        bytesPerLine = 3 * width
-#        qImg = QImage(self.cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888).rgbSwapped()
-#        widget.setPixmap(QPixmap(qImg))
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.reset_btn)
 
@@ -94,6 +91,7 @@ class MainWindow(QMainWindow):
         self.r0 = False
         self.reset_btn.setChecked(True)
         self.cvImg = cv2.imread(self.filename)
+        self.origImg = self.cvImg.copy()
         height, width, channel = self.cvImg.shape
         bytesPerLine = 3 * width
         qImg = QImage(self.cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888).rgbSwapped()
@@ -122,6 +120,11 @@ class MainWindow(QMainWindow):
         readQIMG = QImage(self.cvImg.data, new_w, new_h, bytesPerLine, QImage.Format_RGB888).rgbSwapped()
         self.label.setPixmap(QPixmap(readQIMG))
 
+    def save_image_to_filepath(self, s):
+        if self.filename:
+            save_fp, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files(*);;") 
+            cv2.imwrite(img=self.cvImg, filename=save_fp)
+
     def mousePressEvent(self, e):
         self.start_pos.setX(e.pos().x())
         self.start_pos.setY(e.pos().y())
@@ -147,6 +150,7 @@ class MainWindow(QMainWindow):
         cvImg[:,:,2] = cvImg[:,:,2] + r
         height, width, channel = cvImg.shape
         bytesPerLine = channel * width
+        self.cvImg = cvImg
         qImg2 = QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888).rgbSwapped()
         return qImg2
 

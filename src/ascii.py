@@ -5,7 +5,6 @@ write_to_vid = False
 
 # Define ASCII characters in order of intensity
 ASCII_CHARS = "@%#*+=-:. "
-ASCII_CHARS = ASCII_CHARS[::-1]
 
 
 def resize_image(image, new_width=100):
@@ -28,7 +27,7 @@ def gray_to_ascii_canvas(gray_image, canvas_size, font_scale=1, color=(255, 255,
     for i in range(h):
         for j in range(w):
             intensity = gray_image[i, j]
-            char = ASCII_CHARS[(intensity // (256 // len(ASCII_CHARS)) - 1)]
+            char = ASCII_CHARS[min((intensity // (256 // len(ASCII_CHARS)) - 1), len(ASCII_CHARS)-1)]
             org = (j * step_x, (i + 1) * step_y)  # Bottom-left corner for text
             cv2.putText(canvas, char, org, cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 1)
     return canvas
